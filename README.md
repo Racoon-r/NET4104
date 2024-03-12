@@ -1,2 +1,3 @@
-# NET4102
-Projet NET4102 Télécom SudParis
+# NET4104 - Émission / réception sous GNU Radio
+Projet NET4104 Télécom SudParis
+
