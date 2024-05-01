@@ -6,6 +6,22 @@ Projet NET4104 Télécom SudParis
 4. Alan Van Trigt
 
 # Objectif : Reproduire la chaîne de transmission BLE
+# Problématique : Comment récupérer et décoder un signal émis par un ESP32 en BLE sur le channel advertising (37) ?
+# Plan :
+#   1. Arduino
+#   2. Micropython
+#   3. GNU Radio 
+#   4. Python
+# Conclusion
+
+
+
+
+
+
+
+
+
 # Technologies utilisées
 ## GNU Radio
 
