@@ -5,8 +5,16 @@ Projet NET4104 Télécom SudParis
 3. Valentin Lantigny
 4. Alan Van Trigt
 
-# Objectif : Reproduire la chaîne de transmission BLE
-# Problématique : Comment récupérer et décoder un signal émis par un ESP32 en BLE sur le channel advertising (37) ?
+Dans le monde de la communication sans fil, la technologie Bluetooth Low Energy (BLE) a gagné en popularité en raison de sa faible consommation d'énergie et de sa large gamme d'applications. La possibilité de reproduire la chaîne de transmission BLE pour comprendre et manipuler les signaux émis est d'un intérêt particulier pour de nombreux domaines, de la domotique à l'Internet des Objets.
+
+Dans cette étude, notre objectif est de comprendre comment récupérer et décoder un signal émis par un module ESP32 en utilisant le protocole BLE sur le canal de publicité (channel advertising) n°37. Cette tâche peut sembler complexe, mais en décomposant le processus en différentes étapes et en utilisant les outils appropriés, nous pouvons explorer les mécanismes sous-jacents de cette transmission sans fil.
+
+Notre plan de recherche se décompose en quatre grandes parties. Tout d'abord, nous explorerons l'utilisation d'Arduino et des échecs que nous avons eu avec, pour établir une base de compréhension de la communication BLE. Ensuite, nous nous tournerons vers Micropython, une autre plateforme populaire pour les microcontrôleurs, pour voir comment les mêmes concepts peuvent être appliqués dans un environnement différent.
+
+Par la suite, nous aborderons l'utilisation de GNU Radio, un logiciel de traitement du signal et de communication, pour des analyses plus approfondies et une manipulation avancée des signaux BLE. Enfin, nous utiliserons Python, avec ses bibliothèques spécialisées, pour décoder le signal reçu.
+
+Cette approche progressive nous permettra de couvrir un large éventail d'outils et de techniques, de la programmation embarquée à la manipulation avancée de signaux, dans le but ultime de maîtriser la reproduction et la compréhension de la chaîne de transmission Bluetooth Low Energy.
+
 # Plan :
 #   1. Arduino
 #   2. Micropython
