@@ -52,9 +52,13 @@ Lors de notre phase d’exploration, nous avons essayé de faire communiquer deu
 **Définitions**
 
 MicroPython est une implémentation légère du langage de programmation Python 3 qui est optimisée pour fonctionner sur des microcontrôleurs et d’autres petits systèmes. Voici quelques détails clés sur MicroPython :
+
 •	Implémentation Python : MicroPython est une implémentation complète du langage de programmation Python 3 qui fonctionne directement sur du matériel embarqué comme le Raspberry Pi Pico2. Il comprend un sous-ensemble de la bibliothèque standard Python3.
+
 •	Environnements Contraints : MicroPython est conçu pour fonctionner sur des microcontrôleurs et dans des environnements contraints. Il est assez compact pour tenir et fonctionner dans seulement 256k d’espace de code et 16k de RAM.
+
 •	Interactivité : MicroPython offre une invite interactive (le REPL) pour exécuter des commandes immédiatement. Cela permet aux développeurs de tester rapidement des morceaux de code et de voir les résultats en temps réel.
+
 •	Open Source : MicroPython est écrit en C99 et tout le noyau de MicroPython est disponible pour une utilisation générale sous la licence MIT.
 
 L’ESP32-S3 est un système sur puce puissant, conçu pour être utilisé dans des appareils connectés à Internet. Il peut se connecter à Internet via Wi-Fi et communiquer avec d’autres appareils via Bluetooth Low Energy. Il est également capable de traiter des tâches complexes comme l’intelligence artificielle. 
