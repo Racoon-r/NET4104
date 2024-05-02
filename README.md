@@ -61,7 +61,7 @@ MicroPython est une implémentation légère du langage de programmation Python 
 
 •	Open Source : MicroPython est écrit en C99 et tout le noyau de MicroPython est disponible pour une utilisation générale sous la licence MIT.
 
-L’ESP32-S3 est un système sur puce puissant, conçu pour être utilisé dans des appareils connectés à Internet. Il peut se connecter à Internet via Wi-Fi et communiquer avec d’autres appareils via Bluetooth Low Energy. Il est également capable de traiter des tâches complexes comme l’intelligence artificielle. 
+L’ESP32-S3 est un système sur puce puissant conçu pour être utilisé dans des appareils connectés à Internet. Il peut se connecter à Internet via Wi-Fi et communiquer avec d’autres appareils via Bluetooth Low Energy. Il est également capable de traiter des tâches complexes comme l’intelligence artificielle. 
 
 **Installation**
 
