@@ -123,7 +123,8 @@ Nous importons les mêmes librairies que le serveur dans le code du serveur.
 5.	```async def main()```: : Définit la fonction principale qui recherche un appareil Bluetooth, se connecte à lui, découvre le service et la caractéristique spécifiés, puis lit la valeur de la caractéristique en boucle.
 
 En lançant ces deux codes en même temps, on obtient :
- 
+
+![](static/Capture.png)
 
 Les valeurs sont bien transmises d’un ESP32S3 à l’autre. Nous avons donc pu nous aider de ces fichiers Micropython pour réaliser la partie finale de notre projet.
 
