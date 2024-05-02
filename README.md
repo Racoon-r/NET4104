@@ -168,7 +168,7 @@ Au niveau du code Python, cela se traduit ainsi :
 - Si le bit à la Position 6 vaut 1, le registre est xorée avec la valeur 0b10001000. Le registre est alors de taille 8, avec le bit de poids fort égal à 1, mais l'opération de décalage va enlever le premier bit et le registre retrouvera une taille valant 7.
 - Si le bit à la Position 6 vaut 0, il n'y a pas d'opératoin à faire. La donnée reste échangé, car elle est xorée avec 0, le bit en Position 4 va prendre simplement la valeur du bit en Position 3 et le bit de poids fort sera 0.
 
-** PDU Header**
+**PDU Header**
 Une fois l'algorithme appliqué sur les données correspondant au PDU Header, plusieurs valeurs sont mises à dispositions :
 - PDU Types ;
 - RFU ;
