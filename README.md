@@ -1,6 +1,7 @@
 # Projet NET4104 - Réception d'un signal BLE émis par ESP32 sur le channel 37
 
-Projet s'inscrivant dans le cours NET4104 à Télécom SudParis. 
+Projet s'inscrivant dans le cours NET4104 à Télécom SudParis.
+
 **Auteurs :**
 - Valentin LANTIGNY ; 
 - Jeremy LENOIR ;
@@ -20,7 +21,7 @@ Notre plan de recherche se décompose en trois grandes parties. Tout d'abord, no
 
 Cette approche progressive nous permettra de couvrir un large éventail d'outils et de techniques, de la programmation embarquée à la manipulation avancée de signaux, dans le but ultime de maîtriser la reproduction et la compréhension de la chaîne de transmission Bluetooth Low Energy.
 
-# 1. Choix des technologies
+## 1. Choix des technologies
 Émission/Réception BLE avec ESP32
 Lors de notre exploration pour créer une architecture client-serveur en Bluetooth Low Energy (BLE) avec l'ESP32, nous avons identifié trois solutions potentielles. Dans cette section, nous détaillons les avantages et les inconvénients de chacune de ces solutions.
 
@@ -45,7 +46,7 @@ Désavantage : Cependant, la programmation en C, utilisée dans l'ESP-IDF, peut 
 
 ![ESP-IDF](static/ESPIDF.jpg)
 
-###   2. Communication entre deux ESP32S3
+##   2. Communication entre deux ESP32S3
 
 Lors de notre phase d’exploration, nous avons essayé de faire communiquer deux ESP32S3 entre eux. Pour cela, nous avons testé différents IDE et langages en commençant par Arduino qui, après de nombreuses tentatives ne donnait pas de résultats satisfaisants. Nous avons donc ensuite utilisé le langage Micropython qui offrait une plus grande liberté de manœuvre. Seulement, il était bien plus complexe de mettre en place l’environnement Micropython et de trouver des modèles pour comprendre comment faire communiquer les ESP32S3.
 
@@ -102,7 +103,7 @@ Le premier ESP32S3 sert de serveur. C’est lui qui envoie les données en conti
 Le second sert de client. Il scanne les appareils BLE aux alentours pour en trouver un en particulier : le serveur.
 Voici les deux codes réalisés pour le client et le serveur : 
 
-Voici une description des fonctions de chaque code. [^8]
+Voici une description des fonctions de chaque code. [^1]
 
 server.py :
 1.	```import uasyncio as asyncio``` : Importe le module uasyncio et le renomme en asyncio. Ce module est similaire à la librairie « time ».
@@ -137,16 +138,16 @@ En lançant ces deux codes en même temps, on obtient :
 
 Les valeurs sont bien transmises d’un ESP32S3 à l’autre. Nous avons donc pu nous aider de ces fichiers Micropython pour réaliser la partie finale de notre projet.
 
-###   2. GNU Radio 
+##   3. GNU Radio 
 
 ![](https://www.gnuradio.org/gnuradio_logo_glyphs_as_paths.svg)
 
 Pour recevoir un signal Bluetooth Low Energy, la première étape va être de recevoir et démoduler les données. Pour ce faire, une antenne connectée à un HackRF comportant un oscillateur intégré (40 MHz) va permettre la bonne réception du signal et l'outil GNU Radio permettra d'effectuer la démodulation pour obtenir les données transmises.
 
-Pour les caractéristiques techniques, la documentation `Bluetooth Core Specification v5.3`[^1] est utilisé comme référence. Dans le cadre du projet, seul le `canal 37 Advertising` sera étudié pour simplifier les démarches, celui-ci étant à la fréquence $f = 2.402 \ GHz$.
+Pour les caractéristiques techniques, la documentation `Bluetooth Core Specification v5.3`[^2] est utilisé comme référence. Dans le cadre du projet, seul le `canal 37 Advertising` sera étudié pour simplifier les démarches, celui-ci étant à la fréquence $f = 2.402 \ GHz$.
 Le BLE utilisé également 40 canaux de 2 MHz de large, il faudra donc une fréquence d'échantillonnage $f_{e} = 4 MHz$ pour satisfaire le théorème de Nyquist-Shannon.  
 
-Le HackRF [^2] est un émetteur - récepteur de la marque Great Scott Gadgets opérant de 1 MHz à 6 GHz. Comme plusieurs systèmes d'échantillonnage en quadrature, il peut présenter un _DC Offset_ : c'est un pic au centre du spectre causé par un biais interne. Pour faire face à ce problème, le choix retenu est de régler le HackRF sur une fréquence $f + \delta f$ puis d'effectuer un décalage fréquentiel de $-\delta f$ pour revenir au cadre d'étude [^3], ici, il sera fixé à $\delta f = 1.5 \ MHz$. Par ailleurs, les données sont au format I/Q (type *complex - float32*).
+Le HackRF [^3] est un émetteur - récepteur de la marque Great Scott Gadgets opérant de 1 MHz à 6 GHz. Comme plusieurs systèmes d'échantillonnage en quadrature, il peut présenter un _DC Offset_ : c'est un pic au centre du spectre causé par un biais interne. Pour faire face à ce problème, le choix retenu est de régler le HackRF sur une fréquence $f + \delta f$ puis d'effectuer un décalage fréquentiel de $-\delta f$ pour revenir au cadre d'étude [^4], ici, il sera fixé à $\delta f = 1.5 \ MHz$. Par ailleurs, les données sont au format I/Q (type *complex - float32*).
 
 Le logiciel GNU Radio permet de traiter le signal, notamment pour moduler et démoduler. Deux types de données seront utilisés : les *complex Float 32* en sortie du HackRF, et des *bytes* après démodulation. 
 
@@ -203,12 +204,10 @@ Pour visualiser la réception (et donc voir quand une trame Bluetooth est reçu)
 
 ![GNU Radio - Flowgraph complet](static/ble-flowgraph.png)
 
-[^1]: Ressources Bluetooth: https://www.bluetooth.com/specifications/specs/core-specification-5-3/
-[^2]: HackRF: https://greatscottgadgets.com/hackrf/one/
-[^3]: DC offset : https://hackrf.readthedocs.io/en/latest/faq.html#bigspike.
 
 
-###   3. Python
+
+##   4. Python
 
 Maintenant que le signal Bluetooth Low Energy est démodulé, il faut désormais le décoder.
 Pour rappel, un ESP 32 émet en continu sur le canal 37 Advertising, et le graphe GNU Radio a permis de démoduler le signal, en écrivant les bytes dans un fichier.
@@ -223,13 +222,13 @@ Une trame est définie ainsi :
 ![Trame LE 1M PHY](static/trame.png)
 
 **Preamble**
-La trame doit commencer par un octet valant `0b10101010`, soit `\xAA`[^4]. Le code python va donc parcourir l'ensemble du fichier et mettre dans une liste `position_index` l'index de chaque occurence de `\xAA`.
+La trame doit commencer par un octet valant `0b10101010`, soit `\xAA`[^5]. Le code python va donc parcourir l'ensemble du fichier et mettre dans une liste `position_index` l'index de chaque occurence de `\xAA`.
 
 Chaque préambule peut être le début d'une trame. Donc chaque index présent dans la liste `position_index` est potentiellement le début d'une trame.
 Le code python va parcourir l'ensemble des index et va vérifier que le contenu est en adéquation avec la documentation. Le curseur `pos` est initié avec la valeur inscrite dans `position_index` et va être incrémenté par la taille mentionné dans la Trame LE 1M PHY.
 
 **Access Address**
-Après le préambule vient 4 octets correspondant à l'**Access Address**. Dans le cas du canal d'Advertising, il vaut systèmatiquement `0x8E89BED6`[^5]. La fonction `swap_bytes` permet d'inverser les bytes, car le premier réceptionné est celui de poids faible.
+Après le préambule vient 4 octets correspondant à l'**Access Address**. Dans le cas du canal d'Advertising, il vaut systèmatiquement `0x8E89BED6`[^6]. La fonction `swap_bytes` permet d'inverser les bytes, car le premier réceptionné est celui de poids faible.
 Si l'Access Address est différent, la trame est abandonné et la variable `pos` prend la valeur suivante dans la liste `position_index`.
 
 **PDU**
@@ -253,7 +252,7 @@ L'algorithme utilise un registre à décalage à rétroaction linéaire (LFSR).
 
 ![LFSR](static/lfsr.png)
 
-Le registre est initié ainsi[^6]:
+Le registre est initié ainsi[^7]:
 - La Position 0 prend la valeur 1 ;
 - Les Positions 1 à 6 prennent les valeurs du canal en commencant par le bit de poids fort (les 40 valeurs sont codés sur seulement 6 bits).
 Ainsi, pour le canal 37,
@@ -296,7 +295,7 @@ Le registre est cette fois-ci de 24 bit. Une fois que l'ensemble des données (P
 
 ![CRC](static/CRC.png)
 
-Comme la fonction _Whitening_, le décalage se fait par la droite, et certaines Positions sont xorées avec le bit en Position 24. Le registre est initialisé avec la valeur 0x555555[^7].
+Comme la fonction _Whitening_, le décalage se fait par la droite, et certaines Positions sont xorées avec le bit en Position 24. Le registre est initialisé avec la valeur 0x555555[^8].
 
 Pour le code Python, si le bit de poids faible (Position 24) à la même valeur que le bit entrant (celui de la donnée), le bit résultant du XOR vaudra 0. Le décalage sera simple. Si le bit vaut 1, il faut xoré le registre avec le bit 0b110110100110000000000000 (correspondant aux différentes Position où un XOR est nécessaire).
 
@@ -312,11 +311,14 @@ CRC correct.
 {'Access Address': b'8e89bed6', 'Type': 'ADV_IND', 'RFU': 0, 'ChSel': 1, 'TxAdd': 0, 'RxAdd': 0, 'Length': 37, 'Payload': b'\xc9\xc8\xe7\xa1\xdf|\x02\x01\x06\x06\tESP32\x02\n\t\x11\x07K\x911\xc3\xc9\xc5\xcc\x8f\x9eE\xb5\x1f\x01\xc2\xafO', 'CRC': b'eL\x0b', 'Address': '0x7cdfa1e7c8c9'}
 ```
 
-[^4]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 2.1.1
-[^5]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 2.1.2
- [^6]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.2
-[^7]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.1 
-[^8]: Source communication entre deux ESP32S3 : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
-
-# Conclusion
+## Conclusion
 En conclusion, notre projet nous a permis de parcourir un large éventail de technologies et de méthodes, de la programmation embarquée à l'utilisation d'outils de traitement du signal comme GNU Radio, en passant par le développement de scripts Python pour le décodage des données. Nous avons acquis une compréhension approfondie du fonctionnement du protocole BLE et des différentes étapes impliquées dans la réception et le traitement des signaux Bluetooth Low Energy. Ce projet nous a également permis de développer nos compétences en matière de collaboration et de résolution de problèmes, en travaillant en équipe pour surmonter les défis techniques et atteindre nos objectifs. En fin de compte, nous sommes fiers du travail accompli et des compétences acquises au cours de ce projet, et nous sommes impatients d'appliquer ces connaissances dans des projets futurs.
+
+[^1]: Source communication entre deux ESP32S3 : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
+[^2]: Ressources Bluetooth: https://www.bluetooth.com/specifications/specs/core-specification-5-3/
+[^3]: HackRF: https://greatscottgadgets.com/hackrf/one/
+[^4]: DC offset : https://hackrf.readthedocs.io/en/latest/faq.html#bigspike.
+[^5]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 2.1.1
+[^6]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 2.1.2
+[^7]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.2
+[^8]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.1 
