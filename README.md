@@ -317,4 +317,6 @@ CRC correct.
  [^6]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.2
 [^7]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.1 
 [^8]: Source communication entre deux ESP32S3 : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
+
 # Conclusion
+En conclusion, notre projet nous a permis de parcourir un large éventail de technologies et de méthodes, de la programmation embarquée à l'utilisation d'outils de traitement du signal comme GNU Radio, en passant par le développement de scripts Python pour le décodage des données. Nous avons acquis une compréhension approfondie du fonctionnement du protocole BLE et des différentes étapes impliquées dans la réception et le traitement des signaux Bluetooth Low Energy. Ce projet nous a également permis de développer nos compétences en matière de collaboration et de résolution de problèmes, en travaillant en équipe pour surmonter les défis techniques et atteindre nos objectifs. En fin de compte, nous sommes fiers du travail accompli et des compétences acquises au cours de ce projet, et nous sommes impatients d'appliquer ces connaissances dans des projets futurs.
