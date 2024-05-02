@@ -69,6 +69,7 @@ Pour pouvoir coder en Micropython sur l’ESP32S3, il faut réaliser un certains
 Tout d’abord, il faut que l’ordinateur puisse communiquer avec l’ESP32S3 via le port UART. Il faut donc accéder au « gestionnaire de périphériques » puis « Ports (COM et LPT) » sur Windows. A partir de là, vous pouvez accéder aux paramètres du port sur lequel votre ESP32S3 est branché en cliquant dessus. 
 Vous pouvez ensuite mettre à jour le pilote de périphérique dans l’onglet « Pilote ». 
 Si cela ne marche pas, vous pouvez trouver le driver sur ce site : https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=overview et installer le pilote manuellement en choisissant « Parcourir mon poste de travail pour rechercher des pilotes » puis en cliquant sur le fichier téléchargé.
+
 Une fois le pilote installé, il faut ensuite créer l’environnement Micropython dans les ESP32S3. Pour ce faire, il faut télécharger le firmware de le site de Micropython : https://micropython.org/download/ESP32_GENERIC_S3/  (télécharger le .bin) puis, depuis un invité de commande, entrer les commandes suivantes : 
 
 Installer esptool : ```pip install esptool```
@@ -76,14 +77,15 @@ Installer esptool : ```pip install esptool```
 Supprimer tout environnement potentiellement présent : 
 ```esptool.py --chip esp32s3 --port {nom du Port} erase_flash```
 
-Intégrer le firmware Micropython dans l’ESP32S3
+Intégrer le firmware Micropython dans l’ESP32S3 :
 ```esptool.py --chip esp32s3 --port {nom du Port} write_flash -z 0 {emplacement du fichier téléchargé auparavant}```
 
 Parfait ! L’ESP32S3 est maintenant prêt à recevoir et exécuter du code en Micropython.
+
 Nous utiliserons par la suite le logiciel Visual Studio Code pour programmer nos ESP32S3.
 
-Une fois sur l’interface VS Code, nous allons télécharger les extensions Micropython, Python et Python Debugger pour une manipulation plus aisée du code. (Les fichiers Micropython sont des fichiers « .py », on peut donc ouvrir des fichiers Micropython comme des fichiers Python.)
-Très important : Pour pouvoir interagir avec notre ESP32S3 avec un environnement Micropython, il faut installer l’outil adafruit-ampy :
+Une fois sur l’interface VS Code, nous allons télécharger les extensions Micropython, Python et Python Debugger pour une manipulation plus aisée du code. (Les fichiers Micropython sont des fichiers « .py », on peut donc créer des fichiers Micropython comme des fichiers Python.)
+*Très important* : Pour pouvoir interagir avec notre ESP32S3 avec un environnement Micropython, il faut installer l’outil adafruit-ampy :
 Entrer dans le terminal de VS Code la commande suivante : ```pip install adafruit-ampy```
 Maintenant, pour envoyer du code dans l’ESP32S3, nous utiliserons la commande suivante :
 ```ampy –port {nom du port} run {nom du fichier Micropython}```
@@ -95,11 +97,13 @@ Voilà ! Vous êtes prêt à exécuter votre code Micropython sur votre ESP32S3 
 **Communication BLE entre deux ESP32S3**
 
 Après avoir réalisé toutes les étapes d’installation, nous avons donc écrit et implémenté le code dans deux ESP32S3.
+
 Le premier ESP32S3 sert de serveur. C’est lui qui envoie les données en continu et notifie si une connexion est établie.
 Le second sert de client. Il scanne les appareils BLE aux alentours pour en trouver un en particulier : le serveur.
 Voici les deux codes réalisés pour le client et le serveur : 
 
-Description des fonctions de chaque code.
+Voici une description des fonctions de chaque code.
+
 server.py :
 1.	```import uasyncio as asyncio``` : Importe le module uasyncio et le renomme en asyncio. Ce module est similaire à la librairie « time ».
 2.	```import aioble``` : Importe le module aioble qui est une bibliothèque pour la programmation Bluetooth Low Energy (BLE) asynchrone.
@@ -119,9 +123,9 @@ server.py :
 
 client.py :
 
-Nous importons les mêmes librairies que le serveur dans le code du serveur.
+Dans ce code, nous importons les mêmes librairies que dans celui du serveur.
 
-1.	```SERVICE_UUID = bluetooth.UUID(0x181A)``` : Définit l’UUID du service de l’appareil BLE que le client va rechercher. 0x181A est l’UUID du service de messagerie environnementale.
+1.	```SERVICE_UUID = bluetooth.UUID(0x181A)``` : Définit l’UUID du service de l’appareil BLE que le client va rechercher. 0x181A est l’UUID du service.
 2.	```CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E)``` : Définit l’UUID de la caractéristique de l’appareil BLE que le client va rechercher. 0x2A6E est l’UUID de la caractéristique de message.
 3.	```async def find_device()``` : Définit une fonction asynchrone qui recherche l’autre ESP32S3 en fonction de son nom et de son SERVICE_UUID.
 4.	```def _decode_decimal(data): return struct.unpack("<h", data)[0] / 100``` : Définit une fonction pour décoder une chaîne de bytes en un nombre (décimal inclue : max 99.99).
