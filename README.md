@@ -137,8 +137,7 @@ En lançant ces deux codes en même temps, on obtient :
 
 Les valeurs sont bien transmises d’un ESP32S3 à l’autre. Nous avons donc pu nous aider de ces fichiers Micropython pour réaliser la partie finale de notre projet.
 
-Source : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
-
+[^8]: Source communication entre deux ESP32S3 : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
 
 ###   2. GNU Radio 
 
