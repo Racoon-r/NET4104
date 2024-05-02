@@ -40,6 +40,7 @@ Avantage : L'ESP-IDF (Espressif IoT Development Framework) est la solution nativ
 Désavantage : Cependant, la programmation en C, utilisée dans l'ESP-IDF, peut être considérée comme plus complexe pour certains développeurs habitués à des langages de haut niveau comme Arduino ou Python.
 
 ###   2. GNU Radio 
+
 Pour recevoir un signal Bluetooth Low Energy, la première étape va être de recevoir et démoduler les données. Pour ce faire, une antenne connectée à un HackRF comportant un oscillateur intégré (40 MHz) va permettre la bonne réception du signal et l'outil GNU Radio permettra d'effectuer la démodulation pour obtenir les données transmises.
 
 Pour les caractéristiques techniques, la documentation `Bluetooth Core Specification v5.3` est utilisé comme référence. Dans le cadre du projet, seul le `canal 37 Advertising` sera étudié pour simplifier les démarches, celui-ci étant à la fréquence $f = 2.402 \ GHz$.
@@ -72,19 +73,27 @@ $k_f$ est la sensibilité de la modulation, définis par $k_ f = \frac{2 \pi \De
 
 À noter que si $\beta_f$ << 1, la modulation est appelée Narrow Band Frequency Modulation (NBFM), et pour ($\beta_f$ > 1) elle est appelée Wideband Frequency Modulation (WBFM).
 
-Pour démoduler le signal, il va falloir une boucle à verrouillage de phase, mais elle ne sera pas étudiée ici. Il existe en effet un bloc `GFSK Demod`, lui-même composé de trois autres blocs : un `Quadrature Demod`, un `Symbol Sync` et un `Binary Slicer`. Les deux premiers permettent de démoduler en quadrature (car la modulation fréquentielle est une modulation de phase) et d'effectuer la boucle à verrouillage de phase, pour le dernier bloc celui-ci permet d'obtenir uniquement des bits 0 ou 1.
+Pour démoduler le signal, il va falloir une boucle à verrouillage de phase, mais elle ne sera pas étudiée ici. Il existe en effet un bloc `GFSK Demod`, lui-même composé de trois autres blocs : un `Quadrature Demod`, un `Symbol Sync` et un `Binary Slicer`. Les deux premiers permettent de démoduler en quadrature (car la modulation fréquentielle est une modulation de phase) et de synchroniser l'horloge. Le dernier bloc lui permet d'obtenir uniquement des bits (0 ou 1).
 
-Concernant les paramètres, seulement deux variables sont à changer.  Le `Samples/Symbol` est défini comme le rapport de la fréquence d'échantillonnage sur le débit symbole : 
-$$ 
+Ici, pour plus de simplicité, ce sera le bloc `GFSK Demod` qui sera utilisé. Il y a seulement deux variables à changer :  le `Samples/Symbol`, défini comme le rapport de la fréquence d'échantillonnage sur le débit symbole : 
+$$\begin{align*}
 sps = \frac{f_e}{D_s},
-$$
-et la sensibilité représentant l'écart possible de fréquence lors de la modulation est défini par:
-$$
-s = \frac{\pi}{2} \frac{1}{sps}.
-$$
+\end{align*}$$
 
+et la `Sensitivity`, représentant l'écart possible de fréquence lors de la modulation :
+$$\begin{align*}
+s = \frac{\pi}{2} \frac{1}{sps}.
+\end{aign*}$$
+
+La synchronisation d'horloge n'est pas étudiée ici, les valeurs sont celles par défaut. Cela correspond à l'algorithme de Mueller & Muller.
+
+Pour le BLE, l'envoi de donnée commence toujours par le bit de poids faible. C'est le rôle des deux derniers blocs, `Unpacked to Packed` et `File Sink` permettant d'obtenir une suite de byte dans un fichier suivant la convention _Petit Boutiste_. 
+
+Pour visualiser la réception (et donc voir quand une trame Bluetooth est reçu), un bloc `QT GUI Frequency Sink` permettra de voir le spectre du signal en temps réel ainsi que le signal retenu (_i.e._ quand sa valeur moyenne est à plus de -80 dBm), et un bloc `QT GUI Time Sink` permet de voir les bits.
+ 
 [^1]: HackRF: https://greatscottgadgets.com/hackrf/one/
 [^2]: DC offset : https://hackrf.readthedocs.io/en/latest/faq.html#bigspike.
+
 ###   3. Python
 
 

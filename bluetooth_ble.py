@@ -9,15 +9,17 @@
 # Author: Racoon
 # Copyright: 2024 Racoon - GPL-3.0
 # Description: Implementation of a BLE encoder / decoder
-# GNU Radio version: v3.10.9.2-60-gb0766390
+# GNU Radio version: 3.10.9.2
 
 from PyQt5 import Qt
 from gnuradio import qtgui
+from PyQt5 import QtCore
+from gnuradio import analog
 from gnuradio import blocks
-import pmt
 from gnuradio import digital
-from gnuradio import gr
+from gnuradio import filter
 from gnuradio.filter import firdes
+from gnuradio import gr
 from gnuradio.fft import window
 import sys
 import signal
@@ -26,6 +28,8 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 import numpy as np
+import osmosdr
+import time
 import sip
 
 
@@ -65,18 +69,41 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 2e6
-        self.freq_dev = freq_dev = 50e3
-        self.modulation_index = modulation_index = freq_dev / samp_rate
-        self.BT = BT = 0.5
-        self.sps = sps = BT / modulation_index
-        self.sensitivity = sensitivity = 2*np.pi*freq_dev/samp_rate
+        self.transition_width = transition_width = 300e3
+        self.symbol_rate = symbol_rate = 1e6
+        self.samp_rate = samp_rate = 4e6
+        self.dc_corr = dc_corr = 1.5e6
+        self.cutoff_freq = cutoff_freq = 850e3
+        self.ble_freq = ble_freq = 2402e6
+        self.sps = sps = samp_rate/symbol_rate
+        self.mute = mute = -20
+        self.lowpass_filter = lowpass_filter = firdes.low_pass(1, samp_rate, cutoff_freq, transition_width)
+        self.hackrf_freq = hackrf_freq = ble_freq+dc_corr
 
         ##################################################
         # Blocks
         ##################################################
 
-        self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
+        self._mute_range = qtgui.Range(-100, 10, 1, -20, 200)
+        self._mute_win = qtgui.RangeWidget(self._mute_range, self.set_mute, "'mute'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._mute_win)
+        self.rtlsdr_source_0 = osmosdr.source(
+            args="numchan=" + str(1) + " " + "hackrf=0"
+        )
+        self.rtlsdr_source_0.set_clock_source('internal', 0)
+        self.rtlsdr_source_0.set_time_now(osmosdr.time_spec_t(time.time()), osmosdr.ALL_MBOARDS)
+        self.rtlsdr_source_0.set_sample_rate(samp_rate)
+        self.rtlsdr_source_0.set_center_freq(hackrf_freq, 0)
+        self.rtlsdr_source_0.set_freq_corr(0, 0)
+        self.rtlsdr_source_0.set_dc_offset_mode(0, 0)
+        self.rtlsdr_source_0.set_iq_balance_mode(0, 0)
+        self.rtlsdr_source_0.set_gain_mode(False, 0)
+        self.rtlsdr_source_0.set_gain(10, 0)
+        self.rtlsdr_source_0.set_if_gain(10, 0)
+        self.rtlsdr_source_0.set_bb_gain(0, 0)
+        self.rtlsdr_source_0.set_antenna('', 0)
+        self.rtlsdr_source_0.set_bandwidth(0, 0)
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
             1024, #size
             samp_rate, #samp_rate
             "", #name
@@ -111,12 +138,9 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
             -1, -1, -1, -1, -1]
 
 
-        for i in range(2):
+        for i in range(1):
             if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_time_sink_x_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
-                else:
-                    self.qtgui_time_sink_x_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+                self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
                 self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
             self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
@@ -127,8 +151,8 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
-        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
-            1024, #size
+        self.qtgui_freq_sink_x_0_0 = qtgui.freq_sink_c(
+            32768, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
             0, #fc
             samp_rate, #bw
@@ -136,8 +160,50 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
             1,
             None # parent
         )
+        self.qtgui_freq_sink_x_0_0.set_update_time(0.10)
+        self.qtgui_freq_sink_x_0_0.set_y_axis((-140), 5)
+        self.qtgui_freq_sink_x_0_0.set_y_label('Relative Gain', 'dB')
+        self.qtgui_freq_sink_x_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.qtgui_freq_sink_x_0_0.enable_autoscale(False)
+        self.qtgui_freq_sink_x_0_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0_0.enable_axis_labels(True)
+        self.qtgui_freq_sink_x_0_0.enable_control_panel(False)
+        self.qtgui_freq_sink_x_0_0.set_fft_window_normalized(False)
+
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_freq_sink_x_0_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_freq_sink_x_0_0.set_line_label(i, labels[i])
+            self.qtgui_freq_sink_x_0_0.set_line_width(i, widths[i])
+            self.qtgui_freq_sink_x_0_0.set_line_color(i, colors[i])
+            self.qtgui_freq_sink_x_0_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_freq_sink_x_0_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_0_win)
+        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
+            32768, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "", #name
+            2,
+            None # parent
+        )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
-        self.qtgui_freq_sink_x_0.set_y_axis((-140), 10)
+        self.qtgui_freq_sink_x_0.set_y_axis((-140), 5)
         self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
         self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
         self.qtgui_freq_sink_x_0.enable_autoscale(False)
@@ -158,7 +224,7 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
         alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0]
 
-        for i in range(1):
+        for i in range(2):
             if len(labels[i]) == 0:
                 self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -169,29 +235,38 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(2, "packet_len")
-        self.digital_gfsk_mod_0 = digital.gfsk_mod(
+        self.freq_xlating_fir_filter_xxx_1_0 = filter.freq_xlating_fir_filter_ccc(1, [1], (-dc_corr), samp_rate)
+        self.freq_xlating_fir_filter_lp = filter.freq_xlating_fir_filter_ccc(1, lowpass_filter, 0, samp_rate)
+        self.digital_gfsk_demod_0 = digital.gfsk_demod(
             samples_per_symbol=int(sps),
-            sensitivity=sensitivity,
-            bt=0.5,
+            sensitivity=((np.pi*0.5)/sps),
+            gain_mu=0.175,
+            mu=0.5,
+            omega_relative_limit=0.005,
+            freq_error=0.0,
             verbose=False,
-            log=False,
-            do_unpack=True)
-        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_char*1, samp_rate, True, 0 if "auto" == "auto" else max( int(float(0.1) * samp_rate) if "auto" == "time" else int(0.1), 1) )
-        self.blocks_stream_to_tagged_stream_0 = blocks.stream_to_tagged_stream(gr.sizeof_char, 1, 33, "packet_len")
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/Racoon/TelecomSudParis/BLE/CAT_a.pdf', True, 0, 0)
-        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
+            log=False)
+        self.blocks_unpacked_to_packed_xx_0 = blocks.unpacked_to_packed_bb(1, gr.GR_LSB_FIRST)
+        self.blocks_uchar_to_float_1 = blocks.uchar_to_float()
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, './out_ble', False)
+        self.blocks_file_sink_0.set_unbuffered(False)
+        self.analog_simple_squelch_cc_2 = analog.simple_squelch_cc(mute, 0.1)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
-        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_packet_headergenerator_bb_default_0, 0))
-        self.connect((self.blocks_throttle2_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
-        self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_time_sink_x_0, 0))
-        self.connect((self.digital_packet_headergenerator_bb_default_0, 0), (self.digital_gfsk_mod_0, 0))
+        self.connect((self.analog_simple_squelch_cc_2, 0), (self.freq_xlating_fir_filter_lp, 0))
+        self.connect((self.analog_simple_squelch_cc_2, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.blocks_uchar_to_float_1, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.blocks_uchar_to_float_1, 0))
+        self.connect((self.digital_gfsk_demod_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
+        self.connect((self.freq_xlating_fir_filter_lp, 0), (self.digital_gfsk_demod_0, 0))
+        self.connect((self.freq_xlating_fir_filter_lp, 0), (self.qtgui_freq_sink_x_0_0, 0))
+        self.connect((self.freq_xlating_fir_filter_xxx_1_0, 0), (self.analog_simple_squelch_cc_2, 0))
+        self.connect((self.freq_xlating_fir_filter_xxx_1_0, 0), (self.qtgui_freq_sink_x_0, 1))
+        self.connect((self.rtlsdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_1_0, 0))
 
 
     def closeEvent(self, event):
@@ -202,38 +277,53 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
 
         event.accept()
 
+    def get_transition_width(self):
+        return self.transition_width
+
+    def set_transition_width(self, transition_width):
+        self.transition_width = transition_width
+        self.set_lowpass_filter(firdes.low_pass(1, self.samp_rate, self.cutoff_freq, self.transition_width))
+
+    def get_symbol_rate(self):
+        return self.symbol_rate
+
+    def set_symbol_rate(self, symbol_rate):
+        self.symbol_rate = symbol_rate
+        self.set_sps(self.samp_rate/self.symbol_rate)
+
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.set_modulation_index(self.freq_dev / self.samp_rate)
-        self.set_sensitivity(2*np.pi*self.freq_dev/self.samp_rate)
-        self.blocks_throttle2_0.set_sample_rate(self.samp_rate)
+        self.set_lowpass_filter(firdes.low_pass(1, self.samp_rate, self.cutoff_freq, self.transition_width))
+        self.set_sps(self.samp_rate/self.symbol_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.qtgui_freq_sink_x_0_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
+        self.rtlsdr_source_0.set_sample_rate(self.samp_rate)
 
-    def get_freq_dev(self):
-        return self.freq_dev
+    def get_dc_corr(self):
+        return self.dc_corr
 
-    def set_freq_dev(self, freq_dev):
-        self.freq_dev = freq_dev
-        self.set_modulation_index(self.freq_dev / self.samp_rate)
-        self.set_sensitivity(2*np.pi*self.freq_dev/self.samp_rate)
+    def set_dc_corr(self, dc_corr):
+        self.dc_corr = dc_corr
+        self.set_hackrf_freq(self.ble_freq+self.dc_corr)
+        self.freq_xlating_fir_filter_xxx_1_0.set_center_freq((-self.dc_corr))
 
-    def get_modulation_index(self):
-        return self.modulation_index
+    def get_cutoff_freq(self):
+        return self.cutoff_freq
 
-    def set_modulation_index(self, modulation_index):
-        self.modulation_index = modulation_index
-        self.set_sps(self.BT / self.modulation_index)
+    def set_cutoff_freq(self, cutoff_freq):
+        self.cutoff_freq = cutoff_freq
+        self.set_lowpass_filter(firdes.low_pass(1, self.samp_rate, self.cutoff_freq, self.transition_width))
 
-    def get_BT(self):
-        return self.BT
+    def get_ble_freq(self):
+        return self.ble_freq
 
-    def set_BT(self, BT):
-        self.BT = BT
-        self.set_sps(self.BT / self.modulation_index)
+    def set_ble_freq(self, ble_freq):
+        self.ble_freq = ble_freq
+        self.set_hackrf_freq(self.ble_freq+self.dc_corr)
 
     def get_sps(self):
         return self.sps
@@ -241,11 +331,26 @@ class bluetooth_ble(gr.top_block, Qt.QWidget):
     def set_sps(self, sps):
         self.sps = sps
 
-    def get_sensitivity(self):
-        return self.sensitivity
+    def get_mute(self):
+        return self.mute
 
-    def set_sensitivity(self, sensitivity):
-        self.sensitivity = sensitivity
+    def set_mute(self, mute):
+        self.mute = mute
+        self.analog_simple_squelch_cc_2.set_threshold(self.mute)
+
+    def get_lowpass_filter(self):
+        return self.lowpass_filter
+
+    def set_lowpass_filter(self, lowpass_filter):
+        self.lowpass_filter = lowpass_filter
+        self.freq_xlating_fir_filter_lp.set_taps(self.lowpass_filter)
+
+    def get_hackrf_freq(self):
+        return self.hackrf_freq
+
+    def set_hackrf_freq(self, hackrf_freq):
+        self.hackrf_freq = hackrf_freq
+        self.rtlsdr_source_0.set_center_freq(self.hackrf_freq, 0)
 
 
 
