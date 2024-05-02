@@ -63,11 +63,15 @@ L’ESP32-S3 est un système sur puce puissant, conçu pour être utilisé dans 
 
 Pour pouvoir coder en Micropython sur l’ESP32S3, il faut réaliser un certains nombres d’étapes.
 Tout d’abord, il faut que l’ordinateur puisse communiquer avec l’ESP32S3 via le port UART. Il faut donc accéder au « gestionnaire de périphériques » puis « Ports (COM et LPT) » sur Windows. A partir de là, vous pouvez accéder aux paramètres du port sur lequel votre ESP32S3 est branché en cliquant dessus. 
-Vous pouvez ensuite mettre à jour le pilote de périphérique dans l’onglet « Pilote ». Si cela ne marche pas, vous pouvez trouver le driver sur ce site : https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=overview et installer le pilote manuellement en choisissant « Parcourir mon poste de travail pour rechercher des pilotes » puis en cliquant sur le fichier téléchargé.
+Vous pouvez ensuite mettre à jour le pilote de périphérique dans l’onglet « Pilote ». 
+Si cela ne marche pas, vous pouvez trouver le driver sur ce site : https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=overview et installer le pilote manuellement en choisissant « Parcourir mon poste de travail pour rechercher des pilotes » puis en cliquant sur le fichier téléchargé.
 Une fois le pilote installé, il faut ensuite créer l’environnement Micropython dans les ESP32S3. Pour ce faire, il faut télécharger le firmware de le site de Micropython : https://micropython.org/download/ESP32_GENERIC_S3/  (télécharger le .bin) puis, depuis un invité de commande, entrer les commandes suivantes : 
+
 Installer esptool : ```pip install esptool```
+
 Supprimer tout environnement potentiellement présent : 
 ```esptool.py --chip esp32s3 --port {nom du Port} erase_flash```
+
 Intégrer le firmware Micropython dans l’ESP32S3
 ```esptool.py --chip esp32s3 --port {nom du Port} write_flash -z 0 {emplacement du fichier téléchargé auparavant}```
 
