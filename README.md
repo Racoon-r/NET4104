@@ -1,9 +1,16 @@
-# NET4104 - Émission / réception sous GNU Radio
-Projet NET4104 Télécom SudParis
-1. Romain Moreau
-2. Jeremy Lenoir
-3. Valentin Lantigny
-4. Alan Van Trigt
+# Projet NET4104 - Réception d'un signal BLE émis par ESP32 sur le channel 37
+
+Projet s'inscrivant dans le cours NET4104 à Télécom SudParis. 
+**Auteurs :**
+- Valentin LANTIGNY ; 
+- Jeremy LENOIR ;
+- Romain MOREAU ;
+- Alan VAN TRIGT.
+
+**Encadrant :** 
+- Rémy GRUNBLATT.
+
+## Introduction
 
 Dans le monde de la communication sans fil, la technologie Bluetooth Low Energy (BLE) a gagné en popularité en raison de sa faible consommation d'énergie et de sa large gamme d'applications. La possibilité de reproduire la chaîne de transmission BLE pour comprendre et manipuler les signaux émis est d'un intérêt particulier pour de nombreux domaines, de la domotique à l'Internet des Objets.
 
@@ -13,10 +20,55 @@ Notre plan de recherche se décompose en trois grandes parties. Tout d'abord, no
 
 Cette approche progressive nous permettra de couvrir un large éventail d'outils et de techniques, de la programmation embarquée à la manipulation avancée de signaux, dans le but ultime de maîtriser la reproduction et la compréhension de la chaîne de transmission Bluetooth Low Energy.
 
-# Plan 
-##   1. Choix des technologies
-##   2. GNU Radio 
-##   3. Python
+## Plan 
+###   1. Choix des technologies
+###   2. GNU Radio 
+Pour recevoir un signal Bluetooth Low Energy, la première étape va être de recevoir et démoduler les données. Pour ce faire, une antenne connectée à un HackRF comportant un oscillateur intégré (40 MHz) va permettre la bonne réception du signal et l'outil GNU Radio permettra d'effectuer la démodulation pour obtenir les données transmises.
+
+Pour les caractéristiques techniques, la documentation `Bluetooth Core Specification v5.3` est utilisé comme référence. Dans le cadre du projet, seul le `canal 37 Advertising` sera étudié pour simplifier les démarches, celui-ci étant à la fréquence $f = 2.402 \ GHz$.
+Le BLE utilisé également 40 canaux de 2 MHz de large, il faudra donc une fréquence d'échantillonnage $f_{e} = 4 MHz$ pour satisfaire le théorème de Nyquist-Shannon.  
+
+Le HackRF [^1] est un émetteur - récepteur de la marque Great Scott Gadgets opérant de 1 MHz à 6 GHz. Comme plusieurs systèmes d'échantillonnage en quadrature, il peut présenter un _DC Offset_ : c'est un pic au centre du spectre causé par un biais interne. Pour faire face à ce problème, le choix retenu est de régler le HackRF sur une fréquence $f + \delta f$ puis d'effectuer un décalage fréquentiel de $-\delta f$ pour revenir au cadre d'étude [^2], ici, il sera fixé à $\delta f = 1.5 \ MHz$. Par ailleurs, les données sont au format I/Q (type *complex - float32*).
+
+Le logiciel GNU Radio permet de traiter le signal, notamment pour moduler et démoduler. Deux types de données seront utilisés : les *complex Float 32* en sortie du HackRF, et des *bytes* après démodulation. 
+
+**Réception et filtrage**
+ Sous GNU Radio, le bloc `RTL-SDR Source` va permettre de recevoir le signal BLE. Il est réglé avec une fréquence $f = 2.0435 \ GHz$, et une fréquence d'échantillonnage $f_e = 4 \ MHz$.
+Le décalage fréquentiel pour recentrer le signal est opéré par le bloc `Frequency Xlating FIR Filter`, et un `Simple Squelch` permet de traiter les données uniquement quand la puissance moyenne est supérieure à -80 dBm, ceci pour éviter d'avoir trop d'informations.
+
+Enfin, un deuxième `Frequency Xlating FIR Filter` va servir cette fois de filtre passe-bande pour garder l'information sur 2 MHz. 
+
+**Démodulation**
+Le Core v5.3 décrit les paramètres principaux de la modulation GFSK.
+Supposant un signal message $m$ à transmettre, sur une fréquence $f_m$ et d'amplitude $A_m$,  ainsi que le signal modulé $s_{FM}$ à une fréquence $f_c$ et une amplitude $A_c$. 
+Il vient alors :
+
+$$\begin{align*}
+\begin{dcases}
+{m(t) = A_m cos(2 \pi f_m t)} \\
+{s_{FM}(t) = A_c cos[2\pi f_c t + \beta_f sin(2 \pi f_mt)]} \\
+{\beta_f = \frac{k_f A_m}{2 \pi f_m}}
+\end{dcases}
+\end{align*}$$
+
+$k_f$ est la sensibilité de la modulation, définis par $k_ f = \frac{2 \pi \Delta f_{max}}{A_m}$.
+
+À noter que si $\beta_f$ << 1, la modulation est appelée Narrow Band Frequency Modulation (NBFM), et pour ($\beta_f$ > 1) elle est appelée Wideband Frequency Modulation (WBFM).
+
+Pour démoduler le signal, il va falloir une boucle à verrouillage de phase, mais elle ne sera pas étudiée ici. Il existe en effet un bloc `GFSK Demod`, lui-même composé de trois autres blocs : un `Quadrature Demod`, un `Symbol Sync` et un `Binary Slicer`. Les deux premiers permettent de démoduler en quadrature (car la modulation fréquentielle est une modulation de phase) et d'effectuer la boucle à verrouillage de phase, pour le dernier bloc celui-ci permet d'obtenir uniquement des bits 0 ou 1.
+
+Concernant les paramètres, seulement deux variables sont à changer.  Le `Samples/Symbol` est défini comme le rapport de la fréquence d'échantillonnage sur le débit symbole : 
+$$ 
+sps = \frac{f_e}{D_s},
+$$
+et la sensibilité représentant l'écart possible de fréquence lors de la modulation est défini par:
+$$
+s = \frac{\pi}{2} \frac{1}{sps}.
+$$
+
+[^1]: HackRF: https://greatscottgadgets.com/hackrf/one/
+[^2]: DC offset : https://hackrf.readthedocs.io/en/latest/faq.html#bigspike.
+###   3. Python
 
 # 1. Choix des technologies
 Émission/Réception BLE avec ESP32
