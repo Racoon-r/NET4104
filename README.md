@@ -14,10 +14,11 @@ Notre plan de recherche se décompose en trois grandes parties. Tout d'abord, no
 Cette approche progressive nous permettra de couvrir un large éventail d'outils et de techniques, de la programmation embarquée à la manipulation avancée de signaux, dans le but ultime de maîtriser la reproduction et la compréhension de la chaîne de transmission Bluetooth Low Energy.
 
 # Plan 
-#   1. Choix des technologies
-#   3. GNU Radio 
-#   4. Python
+##   1. Choix des technologies
+##   2. GNU Radio 
+##   3. Python
 
+# 1. Choix des technologies
 Émission/Réception BLE avec ESP32
 Lors de notre exploration pour créer une architecture client-serveur en Bluetooth Low Energy (BLE) avec l'ESP32, nous avons identifié trois solutions potentielles. Dans cette section, nous détaillons les avantages et les inconvénients de chacune de ces solutions.
 
@@ -78,3 +79,7 @@ Désavantage : Demande un travail de préparation assez conséquent, notament en
 ### ESP-IDF
 Avantage : Version native donc version la plus à jour
 Désavantage : Programmation en C
+
+
+
+# Conclusion
