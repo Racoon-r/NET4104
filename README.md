@@ -179,16 +179,16 @@ Une fois l'algorithme appliqué sur les données correspondant au PDU Header, pl
 
 Les différents types sont présentés dans la documentation Bluetooth.
 | PDU Type | PDU Name |
-| --- | --- | ---
-0b0000 | ADV_IND
-0b0001 | ADV_DIRECT_IND
-0b0010 | ADV_NONCONN_IND
-0b0011 | SCAN_REQ
-0b0100 | SCAN_RSP
-0b0101 | CONNECT_IND
-0b0110 | ADV_SCAN_IND
-0b0111 | ADV_EXT_IND
-0b1000 | AUX_CONNECT_RSP
+| --- | --- |
+| 0b0000 | ADV_IND |
+| 0b0001 | ADV_DIRECT_IND |
+| 0b0010 | ADV_NONCONN_IND |
+| 0b0011 | SCAN_REQ |
+| 0b0100 | SCAN_RSP |
+| 0b0101 | CONNECT_IND |
+| 0b0110 | ADV_SCAN_IND |
+| 0b0111 | ADV_EXT_IND |
+| 0b1000 | AUX_CONNECT_RSP |
 
 La dernière étape est le CRC, permettant de vérifier l'absence d'erreur. Comme la longueur est désormais connu, la fonction _Whitening_ peut être appliqué au PDU Header, PDU Payload et au CRC. Ce dernier représente 3 octets, soit 24 bits.
 
