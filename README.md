@@ -49,7 +49,7 @@ Désavantage : Cependant, la programmation en C, utilisée dans l'ESP-IDF, peut 
 
 Lors de notre phase d’exploration, nous avons essayé de faire communiquer deux ESP32S3 entre eux. Pour cela, nous avons testé différents IDE et langages en commençant par Arduino qui, après de nombreuses tentatives ne donnait pas de résultats satisfaisants. Nous avons donc ensuite utilisé le langage Micropython qui offrait une plus grande liberté de manœuvre. Seulement, il était bien plus complexe de mettre en place l’environnement Micropython et de trouver des modèles pour comprendre comment faire communiquer les ESP32S3.
 
-## Définitions
+** Définitions **
 
 MicroPython est une implémentation légère du langage de programmation Python 3 qui est optimisée pour fonctionner sur des microcontrôleurs et d’autres petits systèmes. Voici quelques détails clés sur MicroPython :
 •	Implémentation Python : MicroPython est une implémentation complète du langage de programmation Python 3 qui fonctionne directement sur du matériel embarqué comme le Raspberry Pi Pico2. Il comprend un sous-ensemble de la bibliothèque standard Python3.
@@ -59,17 +59,17 @@ MicroPython est une implémentation légère du langage de programmation Python 
 
 L’ESP32-S3 est un système sur puce puissant, conçu pour être utilisé dans des appareils connectés à Internet. Il peut se connecter à Internet via Wi-Fi et communiquer avec d’autres appareils via Bluetooth Low Energy. Il est également capable de traiter des tâches complexes comme l’intelligence artificielle. 
 
-## Installation
+** Installation **
 
 Pour pouvoir coder en Micropython sur l’ESP32S3, il faut réaliser un certains nombres d’étapes.
 Tout d’abord, il faut que l’ordinateur puisse communiquer avec l’ESP32S3 via le port UART. Il faut donc accéder au « gestionnaire de périphériques » puis « Ports (COM et LPT) » sur Windows. A partir de là, vous pouvez accéder aux paramètres du port sur lequel votre ESP32S3 est branché en cliquant dessus. 
 Vous pouvez ensuite mettre à jour le pilote de périphérique dans l’onglet « Pilote ». Si cela ne marche pas, vous pouvez trouver le driver sur ce site : https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=overview et installer le pilote manuellement en choisissant « Parcourir mon poste de travail pour rechercher des pilotes » puis en cliquant sur le fichier téléchargé.
 Une fois le pilote installé, il faut ensuite créer l’environnement Micropython dans les ESP32S3. Pour ce faire, il faut télécharger le firmware de le site de Micropython : https://micropython.org/download/ESP32_GENERIC_S3/  (télécharger le .bin) puis, depuis un invité de commande, entrer les commandes suivantes : 
-Installer esptool : pip install esptool
+Installer esptool : ```pip install esptool```
 Supprimer tout environnement potentiellement présent : 
-esptool.py --chip esp32s3 --port {nom du Port} erase_flash
+```esptool.py --chip esp32s3 --port {nom du Port} erase_flash```
 Intégrer le firmware Micropython dans l’ESP32S3
-esptool.py --chip esp32s3 --port {nom du Port} write_flash -z 0 {emplacement du fichier téléchargé auparavant}
+```esptool.py --chip esp32s3 --port {nom du Port} write_flash -z 0 {emplacement du fichier téléchargé auparavant}```
 
 Parfait ! L’ESP32S3 est maintenant prêt à recevoir et exécuter du code en Micropython.
 Nous utiliserons par la suite le logiciel Visual Studio Code pour programmer nos ESP32S3.
@@ -83,7 +83,7 @@ Ensuite, depuis le terminal de VS Code, nous allons devoir télécharger une lib
 Entrer la commande suivante pour installer « aioble » : mpremote mip install aioble
 Voilà ! Vous êtes prêt à exécuter votre code Micropython sur votre ESP32S3 !
 
-Communication BLE entre deux ESP32S3
+** Communication BLE entre deux ESP32S3 **
 
 Après avoir réalisé toutes les étapes d’installation, nous avons donc écrit et implémenté le code dans deux ESP32S3.
 Le premier ESP32S3 sert de serveur. C’est lui qui envoie les données en continu et notifie si une connexion est établie.
