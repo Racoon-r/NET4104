@@ -102,7 +102,7 @@ Le premier ESP32S3 sert de serveur. C’est lui qui envoie les données en conti
 Le second sert de client. Il scanne les appareils BLE aux alentours pour en trouver un en particulier : le serveur.
 Voici les deux codes réalisés pour le client et le serveur : 
 
-Voici une description des fonctions de chaque code.
+Voici une description des fonctions de chaque code. [^8]
 
 server.py :
 1.	```import uasyncio as asyncio``` : Importe le module uasyncio et le renomme en asyncio. Ce module est similaire à la librairie « time ».
@@ -136,8 +136,6 @@ En lançant ces deux codes en même temps, on obtient :
 ![](static/Capture.PNG)
 
 Les valeurs sont bien transmises d’un ESP32S3 à l’autre. Nous avons donc pu nous aider de ces fichiers Micropython pour réaliser la partie finale de notre projet.
-
-[^8]: Source communication entre deux ESP32S3 : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
 
 ###   2. GNU Radio 
 
