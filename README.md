@@ -75,15 +75,17 @@ $k_f$ est la sensibilité de la modulation, définis par $k_ f = \frac{2 \pi \De
 
 Pour démoduler le signal, il va falloir une boucle à verrouillage de phase, mais elle ne sera pas étudiée ici. Il existe en effet un bloc `GFSK Demod`, lui-même composé de trois autres blocs : un `Quadrature Demod`, un `Symbol Sync` et un `Binary Slicer`. Les deux premiers permettent de démoduler en quadrature (car la modulation fréquentielle est une modulation de phase) et de synchroniser l'horloge. Le dernier bloc lui permet d'obtenir uniquement des bits (0 ou 1).
 
-Ici, pour plus de simplicité, ce sera le bloc `GFSK Demod` qui sera utilisé. Il y a seulement deux variables à changer :  le `Samples/Symbol`, défini comme le rapport de la fréquence d'échantillonnage sur le débit symbole : 
+Ici, pour plus de simplicité, ce sera le bloc `GFSK Demod` qui sera utilisé. Il y a seulement deux variables à changer :  le `Samples/Symbol`, défini comme le rapport de la fréquence d'échantillonnage sur le débit symbole :
+
 $$\begin{align*}
 sps = \frac{f_e}{D_s},
 \end{align*}$$
 
 et la `Sensitivity`, représentant l'écart possible de fréquence lors de la modulation :
+
 $$\begin{align*}
 s = \frac{\pi}{2} \frac{1}{sps}.
-\end{aign*}$$
+\end{align*}$$
 
 La synchronisation d'horloge n'est pas étudiée ici, les valeurs sont celles par défaut. Cela correspond à l'algorithme de Mueller & Muller.
 
