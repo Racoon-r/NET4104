@@ -53,7 +53,7 @@ Lors de notre phase d’exploration, nous avons essayé de faire communiquer deu
 
 MicroPython est une implémentation légère du langage de programmation Python 3 qui est optimisée pour fonctionner sur des microcontrôleurs et d’autres petits systèmes. Voici quelques détails clés sur MicroPython :
 
-•	Implémentation Python : MicroPython est une implémentation complète du langage de programmation Python 3 qui fonctionne directement sur du matériel embarqué comme le Raspberry Pi Pico2. Il comprend un sous-ensemble de la bibliothèque standard Python3.
+•	Implémentation Python : MicroPython est une implémentation complète du langage de programmation Python 3 qui fonctionne directement sur du matériel embarqué comme l'ESP32S3. Il comprend un sous-ensemble de la bibliothèque standard Python3.
 
 •	Environnements Contraints : MicroPython est conçu pour fonctionner sur des microcontrôleurs et dans des environnements contraints. Il est assez compact pour tenir et fonctionner dans seulement 256k d’espace de code et 16k de RAM.
 
