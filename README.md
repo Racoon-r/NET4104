@@ -45,6 +45,87 @@ Désavantage : Cependant, la programmation en C, utilisée dans l'ESP-IDF, peut 
 
 ![ESP-IDF](static/ESPIDF.jpg)
 
+###   2. Communication entre deux ESP32S3
+
+Lors de notre phase d’exploration, nous avons essayé de faire communiquer deux ESP32S3 entre eux. Pour cela, nous avons testé différents IDE et langages en commençant par Arduino qui, après de nombreuses tentatives ne donnait pas de résultats satisfaisants. Nous avons donc ensuite utilisé le langage Micropython qui offrait une plus grande liberté de manœuvre. Seulement, il était bien plus complexe de mettre en place l’environnement Micropython et de trouver des modèles pour comprendre comment faire communiquer les ESP32S3.
+
+## Définitions
+
+MicroPython est une implémentation légère du langage de programmation Python 3 qui est optimisée pour fonctionner sur des microcontrôleurs et d’autres petits systèmes. Voici quelques détails clés sur MicroPython :
+•	Implémentation Python : MicroPython est une implémentation complète du langage de programmation Python 3 qui fonctionne directement sur du matériel embarqué comme le Raspberry Pi Pico2. Il comprend un sous-ensemble de la bibliothèque standard Python3.
+•	Environnements Contraints : MicroPython est conçu pour fonctionner sur des microcontrôleurs et dans des environnements contraints. Il est assez compact pour tenir et fonctionner dans seulement 256k d’espace de code et 16k de RAM.
+•	Interactivité : MicroPython offre une invite interactive (le REPL) pour exécuter des commandes immédiatement. Cela permet aux développeurs de tester rapidement des morceaux de code et de voir les résultats en temps réel.
+•	Open Source : MicroPython est écrit en C99 et tout le noyau de MicroPython est disponible pour une utilisation générale sous la licence MIT.
+
+L’ESP32-S3 est un système sur puce puissant, conçu pour être utilisé dans des appareils connectés à Internet. Il peut se connecter à Internet via Wi-Fi et communiquer avec d’autres appareils via Bluetooth Low Energy. Il est également capable de traiter des tâches complexes comme l’intelligence artificielle. 
+
+## Installation
+
+Pour pouvoir coder en Micropython sur l’ESP32S3, il faut réaliser un certains nombres d’étapes.
+Tout d’abord, il faut que l’ordinateur puisse communiquer avec l’ESP32S3 via le port UART. Il faut donc accéder au « gestionnaire de périphériques » puis « Ports (COM et LPT) » sur Windows. A partir de là, vous pouvez accéder aux paramètres du port sur lequel votre ESP32S3 est branché en cliquant dessus. 
+Vous pouvez ensuite mettre à jour le pilote de périphérique dans l’onglet « Pilote ». Si cela ne marche pas, vous pouvez trouver le driver sur ce site : https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=overview et installer le pilote manuellement en choisissant « Parcourir mon poste de travail pour rechercher des pilotes » puis en cliquant sur le fichier téléchargé.
+Une fois le pilote installé, il faut ensuite créer l’environnement Micropython dans les ESP32S3. Pour ce faire, il faut télécharger le firmware de le site de Micropython : https://micropython.org/download/ESP32_GENERIC_S3/  (télécharger le .bin) puis, depuis un invité de commande, entrer les commandes suivantes : 
+Installer esptool : pip install esptool
+Supprimer tout environnement potentiellement présent : 
+esptool.py --chip esp32s3 --port {nom du Port} erase_flash
+Intégrer le firmware Micropython dans l’ESP32S3
+esptool.py --chip esp32s3 --port {nom du Port} write_flash -z 0 {emplacement du fichier téléchargé auparavant}
+
+Parfait ! L’ESP32S3 est maintenant prêt à recevoir et exécuter du code en Micropython.
+Nous utiliserons par la suite le logiciel Visual Studio Code pour programmer nos ESP32S3.
+
+Une fois sur l’interface VS Code, nous allons télécharger les extensions Micropython, Python et Python Debugger pour une manipulation plus aisée du code. (Les fichiers Micropython sont des fichiers « .py », on peut donc ouvrir des fichiers Micropython comme des fichiers Python.)
+Très important : Pour pouvoir interagir avec notre ESP32S3 avec un environnement Micropython, il faut installer l’outil adafruit-ampy :
+Entrer dans le terminal de VS Code la commande suivante : pip install adafruit-ampy
+Maintenant, pour envoyer du code dans l’ESP32S3, nous utiliserons la commande suivante :
+ampy –port {nom du port} run {nom du fichier Micropython}
+Ensuite, depuis le terminal de VS Code, nous allons devoir télécharger une librairie dans le répertoire de projet : « aioble » qui sera très utile pour gérer la communication BLE dans notre code. 
+Entrer la commande suivante pour installer « aioble » : mpremote mip install aioble
+Voilà ! Vous êtes prêt à exécuter votre code Micropython sur votre ESP32S3 !
+
+Communication BLE entre deux ESP32S3
+
+Après avoir réalisé toutes les étapes d’installation, nous avons donc écrit et implémenté le code dans deux ESP32S3.
+Le premier ESP32S3 sert de serveur. C’est lui qui envoie les données en continu et notifie si une connexion est établie.
+Le second sert de client. Il scanne les appareils BLE aux alentours pour en trouver un en particulier : le serveur.
+Voici les deux codes réalisés pour le client et le serveur : 
+
+Description des fonctions de chaque code.
+server.py :
+1.	import uasyncio as asyncio : Importe le module uasyncio et le renomme en asyncio. Ce module est similaire à la librairie « time ».
+2.	import aioble : Importe le module aioble qui est une bibliothèque pour la programmation Bluetooth Low Energy (BLE) asynchrone.
+3.	import bluetooth : Importe le module bluetooth pour utiliser les fonctionnalités Bluetooth.
+4.	import random : Importe le module random qui contient des fonctions pour générer des nombres aléatoires.
+5.	import struct : Importe le module struct qui fournit des fonctions pour convertir entre chaînes de bytes et types de données natifs Python (comme les nombres et les chaînes).
+6.	SERVICE_UUID = bluetooth.UUID(0x181A) : Définit l’UUID du service Bluetooth que le serveur va fournir. 0x181A est l’UUID du service.
+7.	CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E) : Définit l’UUID de la caractéristique Bluetooth que le serveur va fournir. 0x2A6E est l’UUID de la caractéristique de message.
+8.	_ADV_APPEARANCE_GENERIC = const(768) : Définit l’apparence de l’advertising Bluetooth. 768 est la valeur pour une apparence générique.
+9.	_ADV_INTERVAL_MS = 250_000 : Définit l’intervalle de temps (en millisecondes) entre deux advertising.
+10.	service = aioble.Service(SERVICE_UUID) : Crée un nouveau service Bluetooth avec l’UUID spécifié.
+11.	characteristic = aioble.Characteristic(service, CHARACTERISTIC_UUID, read=True, notify=True) : Crée une nouvelle caractéristique Bluetooth avec l’UUID spécifié, qui peut être lue et qui envoie des notifications lorsque sa valeur change.
+12.	def _encode_decimal(c): return struct.pack("<h", int(c * 100)) : Définit une fonction pour encoder un nombre en une chaîne de bytes et cela inclut les nombres décimaux avec un maximum de 99.99 (choix arbitraire).
+13.	async def sending_task() : Définit une tâche qui génère et écrit la valeur de t qui est envoyé vers l’autre ESP32S3.
+14.	async def peripheral_task(): : Définit une tâche asynchrone qui attend des connexions Bluetooth et arrête l’advertising lorsqu’une connexion est établie.
+
+
+client.py :
+
+Nous importons les mêmes librairies que le serveur dans le code du client.
+
+1.	SERVICE_UUID = bluetooth.UUID(0x181A) : Définit l’UUID du service de l’appareil BLE que le client va rechercher. 0x181A est l’UUID du service de messagerie environnementale.
+2.	CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E) : Définit l’UUID de la caractéristique de l’appareil BLE que le client va rechercher. 0x2A6E est l’UUID de la caractéristique de message.
+3.	async def find_device(): : Définit une fonction asynchrone qui recherche l’autre ESP32S3 en fonction de son nom et de son SERVICE_UUID.
+4.	def _decode_decimal(data): return struct.unpack("<h", data)[0] / 100 : Définit une fonction pour décoder une chaîne de bytes en un nombre (décimal inclue : max 99.99).
+5.	async def main(): : Définit la fonction principale qui recherche un appareil Bluetooth, se connecte à lui, découvre le service et la caractéristique spécifiés, puis lit la valeur de la caractéristique en boucle.
+
+En lançant ces deux codes en même temps, on obtient :
+ 
+
+Les valeurs sont bien transmises d’un ESP32S3 à l’autre. Nous avons donc pu nous aider de ces fichiers Micropython pour réaliser la partie finale de notre projet.
+
+Source : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
+
+
 ###   2. GNU Radio 
 
 ![](https://www.gnuradio.org/gnuradio_logo_glyphs_as_paths.svg)
