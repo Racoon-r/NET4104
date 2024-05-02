@@ -80,11 +80,12 @@ Nous utiliserons par la suite le logiciel Visual Studio Code pour programmer nos
 
 Une fois sur l’interface VS Code, nous allons télécharger les extensions Micropython, Python et Python Debugger pour une manipulation plus aisée du code. (Les fichiers Micropython sont des fichiers « .py », on peut donc ouvrir des fichiers Micropython comme des fichiers Python.)
 Très important : Pour pouvoir interagir avec notre ESP32S3 avec un environnement Micropython, il faut installer l’outil adafruit-ampy :
-Entrer dans le terminal de VS Code la commande suivante : pip install adafruit-ampy
+Entrer dans le terminal de VS Code la commande suivante : ```pip install adafruit-ampy```
 Maintenant, pour envoyer du code dans l’ESP32S3, nous utiliserons la commande suivante :
-ampy –port {nom du port} run {nom du fichier Micropython}
+```ampy –port {nom du port} run {nom du fichier Micropython}```
 Ensuite, depuis le terminal de VS Code, nous allons devoir télécharger une librairie dans le répertoire de projet : « aioble » qui sera très utile pour gérer la communication BLE dans notre code. 
-Entrer la commande suivante pour installer « aioble » : mpremote mip install aioble
+Entrer la commande suivante pour installer « aioble » : ```mpremote mip install aioble```
+
 Voilà ! Vous êtes prêt à exécuter votre code Micropython sur votre ESP32S3 !
 
 ** Communication BLE entre deux ESP32S3 **
