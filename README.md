@@ -96,31 +96,31 @@ Voici les deux codes réalisés pour le client et le serveur :
 
 Description des fonctions de chaque code.
 server.py :
-1.	import uasyncio as asyncio : Importe le module uasyncio et le renomme en asyncio. Ce module est similaire à la librairie « time ».
-2.	import aioble : Importe le module aioble qui est une bibliothèque pour la programmation Bluetooth Low Energy (BLE) asynchrone.
-3.	import bluetooth : Importe le module bluetooth pour utiliser les fonctionnalités Bluetooth.
-4.	import random : Importe le module random qui contient des fonctions pour générer des nombres aléatoires.
-5.	import struct : Importe le module struct qui fournit des fonctions pour convertir entre chaînes de bytes et types de données natifs Python (comme les nombres et les chaînes).
-6.	SERVICE_UUID = bluetooth.UUID(0x181A) : Définit l’UUID du service Bluetooth que le serveur va fournir. 0x181A est l’UUID du service.
-7.	CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E) : Définit l’UUID de la caractéristique Bluetooth que le serveur va fournir. 0x2A6E est l’UUID de la caractéristique de message.
-8.	_ADV_APPEARANCE_GENERIC = const(768) : Définit l’apparence de l’advertising Bluetooth. 768 est la valeur pour une apparence générique.
-9.	_ADV_INTERVAL_MS = 250_000 : Définit l’intervalle de temps (en millisecondes) entre deux advertising.
-10.	service = aioble.Service(SERVICE_UUID) : Crée un nouveau service Bluetooth avec l’UUID spécifié.
-11.	characteristic = aioble.Characteristic(service, CHARACTERISTIC_UUID, read=True, notify=True) : Crée une nouvelle caractéristique Bluetooth avec l’UUID spécifié, qui peut être lue et qui envoie des notifications lorsque sa valeur change.
-12.	def _encode_decimal(c): return struct.pack("<h", int(c * 100)) : Définit une fonction pour encoder un nombre en une chaîne de bytes et cela inclut les nombres décimaux avec un maximum de 99.99 (choix arbitraire).
-13.	async def sending_task() : Définit une tâche qui génère et écrit la valeur de t qui est envoyé vers l’autre ESP32S3.
-14.	async def peripheral_task(): : Définit une tâche asynchrone qui attend des connexions Bluetooth et arrête l’advertising lorsqu’une connexion est établie.
+1.	```import uasyncio as asyncio``` : Importe le module uasyncio et le renomme en asyncio. Ce module est similaire à la librairie « time ».
+2.	```import aioble``` : Importe le module aioble qui est une bibliothèque pour la programmation Bluetooth Low Energy (BLE) asynchrone.
+3.	```import bluetooth``` : Importe le module bluetooth pour utiliser les fonctionnalités Bluetooth.
+4.	```import random``` : Importe le module random qui contient des fonctions pour générer des nombres aléatoires.
+5.	```import struct``` : Importe le module struct qui fournit des fonctions pour convertir entre chaînes de bytes et types de données natifs Python (comme les nombres et les chaînes).
+6.	```SERVICE_UUID = bluetooth.UUID(0x181A)``` : Définit l’UUID du service Bluetooth que le serveur va fournir. 0x181A est l’UUID du service.
+7.	```CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E)``` : Définit l’UUID de la caractéristique Bluetooth que le serveur va fournir. 0x2A6E est l’UUID de la caractéristique de message.
+8.	```_ADV_APPEARANCE_GENERIC = const(768)``` : Définit l’apparence de l’advertising Bluetooth. 768 est la valeur pour une apparence générique.
+9.	```_ADV_INTERVAL_MS = 250_000``` : Définit l’intervalle de temps (en millisecondes) entre deux advertising.
+10.	```service = aioble.Service(SERVICE_UUID)``` : Crée un nouveau service Bluetooth avec l’UUID spécifié.
+11.	```characteristic = aioble.Characteristic(service, CHARACTERISTIC_UUID, read=True, notify=True)``` : Crée une nouvelle caractéristique Bluetooth avec l’UUID spécifié, qui peut être lue et qui envoie des notifications lorsque sa valeur change.
+12.	```def _encode_decimal(c): return struct.pack("<h", int(c * 100))``` : Définit une fonction pour encoder un nombre en une chaîne de bytes et cela inclut les nombres décimaux avec un maximum de 99.99 (choix arbitraire).
+13.	```async def sending_task()``` : Définit une tâche qui génère et écrit la valeur de t qui est envoyé vers l’autre ESP32S3.
+14.	```async def peripheral_task()``` : Définit une tâche asynchrone qui attend des connexions Bluetooth et arrête l’advertising lorsqu’une connexion est établie.
 
 
 client.py :
 
-Nous importons les mêmes librairies que le serveur dans le code du client.
+Nous importons les mêmes librairies que le serveur dans le code du serveur.
 
-1.	SERVICE_UUID = bluetooth.UUID(0x181A) : Définit l’UUID du service de l’appareil BLE que le client va rechercher. 0x181A est l’UUID du service de messagerie environnementale.
-2.	CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E) : Définit l’UUID de la caractéristique de l’appareil BLE que le client va rechercher. 0x2A6E est l’UUID de la caractéristique de message.
-3.	async def find_device(): : Définit une fonction asynchrone qui recherche l’autre ESP32S3 en fonction de son nom et de son SERVICE_UUID.
-4.	def _decode_decimal(data): return struct.unpack("<h", data)[0] / 100 : Définit une fonction pour décoder une chaîne de bytes en un nombre (décimal inclue : max 99.99).
-5.	async def main(): : Définit la fonction principale qui recherche un appareil Bluetooth, se connecte à lui, découvre le service et la caractéristique spécifiés, puis lit la valeur de la caractéristique en boucle.
+1.	```SERVICE_UUID = bluetooth.UUID(0x181A)``` : Définit l’UUID du service de l’appareil BLE que le client va rechercher. 0x181A est l’UUID du service de messagerie environnementale.
+2.	```CHARACTERISTIC_UUID = bluetooth.UUID(0x2A6E)``` : Définit l’UUID de la caractéristique de l’appareil BLE que le client va rechercher. 0x2A6E est l’UUID de la caractéristique de message.
+3.	```async def find_device()``` : Définit une fonction asynchrone qui recherche l’autre ESP32S3 en fonction de son nom et de son SERVICE_UUID.
+4.	```def _decode_decimal(data): return struct.unpack("<h", data)[0] / 100``` : Définit une fonction pour décoder une chaîne de bytes en un nombre (décimal inclue : max 99.99).
+5.	```async def main()```: : Définit la fonction principale qui recherche un appareil Bluetooth, se connecte à lui, découvre le service et la caractéristique spécifiés, puis lit la valeur de la caractéristique en boucle.
 
 En lançant ces deux codes en même temps, on obtient :
  
