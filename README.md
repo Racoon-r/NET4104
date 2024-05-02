@@ -41,6 +41,8 @@ Désavantage : Cependant, la programmation en C, utilisée dans l'ESP-IDF, peut 
 
 ###   2. GNU Radio 
 
+![](https://www.gnuradio.org/gnuradio_logo_glyphs_as_paths.svg)
+
 Pour recevoir un signal Bluetooth Low Energy, la première étape va être de recevoir et démoduler les données. Pour ce faire, une antenne connectée à un HackRF comportant un oscillateur intégré (40 MHz) va permettre la bonne réception du signal et l'outil GNU Radio permettra d'effectuer la démodulation pour obtenir les données transmises.
 
 Pour les caractéristiques techniques, la documentation `Bluetooth Core Specification v5.3` est utilisé comme référence. Dans le cadre du projet, seul le `canal 37 Advertising` sera étudié pour simplifier les démarches, celui-ci étant à la fréquence $f = 2.402 \ GHz$.
@@ -51,12 +53,18 @@ Le HackRF [^1] est un émetteur - récepteur de la marque Great Scott Gadgets op
 Le logiciel GNU Radio permet de traiter le signal, notamment pour moduler et démoduler. Deux types de données seront utilisés : les *complex Float 32* en sortie du HackRF, et des *bytes* après démodulation. 
 
 **Réception et filtrage**
+
+![GNU Radio - Réception et filtrage](static/ble-rx-filt.png)
+
  Sous GNU Radio, le bloc `RTL-SDR Source` va permettre de recevoir le signal BLE. Il est réglé avec une fréquence $f = 2.0435 \ GHz$, et une fréquence d'échantillonnage $f_e = 4 \ MHz$.
 Le décalage fréquentiel pour recentrer le signal est opéré par le bloc `Frequency Xlating FIR Filter`, et un `Simple Squelch` permet de traiter les données uniquement quand la puissance moyenne est supérieure à -80 dBm, ceci pour éviter d'avoir trop d'informations.
 
 Enfin, un deuxième `Frequency Xlating FIR Filter` va servir cette fois de filtre passe-bande pour garder l'information sur 2 MHz. 
 
 **Démodulation**
+
+![GNU Radio - Démodulation](static/ble-demod.png)
+
 Le Core v5.3 décrit les paramètres principaux de la modulation GFSK.
 Supposant un signal message $m$ à transmettre, sur une fréquence $f_m$ et d'amplitude $A_m$,  ainsi que le signal modulé $s_{FM}$ à une fréquence $f_c$ et une amplitude $A_c$. 
 Il vient alors :
@@ -89,10 +97,14 @@ s = \frac{\pi}{2} \frac{1}{sps}.
 
 La synchronisation d'horloge n'est pas étudiée ici, les valeurs sont celles par défaut. Cela correspond à l'algorithme de Mueller & Muller.
 
+**Exportation**
+
 Pour le BLE, l'envoi de donnée commence toujours par le bit de poids faible. C'est le rôle des deux derniers blocs, `Unpacked to Packed` et `File Sink` permettant d'obtenir une suite de byte dans un fichier suivant la convention _Petit Boutiste_. 
 
 Pour visualiser la réception (et donc voir quand une trame Bluetooth est reçu), un bloc `QT GUI Frequency Sink` permettra de voir le spectre du signal en temps réel ainsi que le signal retenu (_i.e._ quand sa valeur moyenne est à plus de -80 dBm), et un bloc `QT GUI Time Sink` permet de voir les bits.
- 
+
+![GNU Radio - Flowgraph complet](static/ble-flowgraph.png)
+
 [^1]: HackRF: https://greatscottgadgets.com/hackrf/one/
 [^2]: DC offset : https://hackrf.readthedocs.io/en/latest/faq.html#bigspike.
 
