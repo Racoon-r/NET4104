@@ -318,5 +318,5 @@ CRC correct.
 [^5]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 2.1.2
  [^6]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.2
 [^7]: Bluetooth Core Specification v5.3, Vol. 6, Part B, 3.1 
-
+[^8]: Source communication entre deux ESP32S3 : https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples
 # Conclusion
